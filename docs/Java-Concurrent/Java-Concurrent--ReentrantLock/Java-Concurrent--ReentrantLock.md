@@ -28,6 +28,8 @@ Condition condition = lock.newCondition();
 使用方式很简单，在产生ReentrantLock 实例时，通过指定参数（true 或 false）来显示使用公平锁或非公平锁。
 对于Condition，在我前面博客中有分析（[Java 并发 ---AbstractQueuedSynchronizer-共享模式与Condition](http://blog.ztgreat.cn/article/9)），如果对这个知识点不熟悉，也不会影响我们对ReentrantLock的分析。
 
+#### 内部结构
+
 下面展示的是ReentrantLock的内部结构。
 ```
 public class ReentrantLock implements Lock, java.io.Serializable {
@@ -139,7 +141,33 @@ protected final boolean tryAcquire(int acquires) {
 }
 ```
 
+#### hasQueuedPredecessors
+
 在同步器中我们已经知道了 **只有前驱节点是头节点，才能够尝试获取同步状态**，在公平锁中也遵循该规则，因此hasQueuedPredecessors 判断的是当前线程节点是否是头结点的后继节点，只有符合该规则那么才会获取同步状态，同时设置当前现在为获取锁的线程。
+
+```
+/**
+ * Queries whether any threads have been waiting to acquire longer
+ * than the current thread.
+ *
+ * @return {@code true} if there is a queued thread preceding the
+ *         current thread, and {@code false} if the current thread
+ *         is at the head of the queue or the queue is empty
+ * @since 1.7
+ */
+public final boolean hasQueuedPredecessors() {
+    // The correctness of this depends on head being initialized
+    // before tail and on head.next being accurate if the current
+    // thread is first in queue.
+    Node t = tail; // Read fields in reverse initialization order
+    Node h = head;
+    Node s;
+    return h != t &&
+        ((s = h.next) == null || s.thread != Thread.currentThread());
+}
+```
+
+我们继续看后面的代码：
 
 ```
 else if (current == getExclusiveOwnerThread()) {
@@ -183,7 +211,7 @@ final boolean acquireQueued(final Node node, int arg) {
 #### 公平锁小结
 公平锁我们看到其实很简单，严格按照FIFO规则获取锁，对于每个线程节点来说都是公平的，先请求锁的线程总是会先得到锁。
 
-    1. 公共锁**初次获取锁**的过程遵循FIFO规则
+    1. 公共锁 初次获取锁 的过程遵循FIFO规则
     2. 公平锁初次获取锁过后，后续过程同样遵循FIFO规则。
 
 ### 非公平锁实现
@@ -242,7 +270,7 @@ final boolean nonfairTryAcquire(int acquires) {
 
 #### 非公平锁小结
 
-    1. 非公共锁**初次获取锁**的过程不遵循FIFO规则（插队）
+    1. 非公共锁 初次获取锁 的过程不遵循FIFO规则（插队）
     2. 非公平锁初次获取锁过后，后续过程同样遵循FIFO规则。
 
 ### ReentrantLock总结
