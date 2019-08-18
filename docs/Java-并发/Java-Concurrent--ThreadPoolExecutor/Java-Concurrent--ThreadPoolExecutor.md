@@ -821,7 +821,77 @@ public List<Runnable> shutdownNow() {
  }
 ```
 
+
+
+### newFixedThreadPool
+
+```
+public static ExecutorService newFixedThreadPool(int nThreads) {
+        return new ThreadPoolExecutor(nThreads,  // corePoolSize
+                                      nThreads,  // maximumPoolSize == corePoolSize
+                                      0L,        // 空闲时间限制是 0
+                                      TimeUnit.MILLISECONDS,
+									  // 无界阻塞队列
+                                      new LinkedBlockingQueue<Runnable>());
+    }
+```
+
+
+
+### newCacheThreadPool
+
+```
+public static ExecutorService newCachedThreadPool() {
+        return new ThreadPoolExecutor(0,  // corePoolSoze == 0
+        							  Integer.MAX_VALUE, // maximumPoolSize 非常大
+                                      60L, 			// 空闲判定是60 秒
+                                      TimeUnit.SECONDS,
+                                      // 神奇的无存储空间阻塞队列，每个 put 必须要等待一个 take
+                                      new SynchronousQueue<Runnable>());
+}
+```
+
+
+
+### newSingleThreadPool
+
+```
+public static ExecutorService newSingleThreadExecutor() {
+        return new FinalizableDelegatedExecutorService
+            (new ThreadPoolExecutor(1, 
+            						1,
+                                    0L, 
+                                    TimeUnit.MILLISECONDS,
+                                    new LinkedBlockingQueue<Runnable>()));
+    }
+```
+
+可以看到除了多了个 `FinalizableDelegatedExecutorService` 代理，其初始化和 `newFiexdThreadPool` 的 nThreads = 1 的时候是一样的。 
+
+区别就在于：
+
+1、newSingleThreadExecutor返回的ExcutorService在析构函数finalize()处会调用shutdown() 
+
+```
+static class FinalizableDelegatedExecutorService
+        extends DelegatedExecutorService {
+        FinalizableDelegatedExecutorService(ExecutorService executor) {
+            super(executor);
+        }
+        protected void finalize() {
+            super.shutdown();
+        }
+    }
+```
+
+
+
+2、如果我们没有对它调用shutdown()，那么可以确保它在被回收时调用shutdown()来终止线程。
+
+
+
 ### 总结
+
 从线程池的简单架构入手，分析了线程池的结构，紧接着分析了线程池的重要实现ThreadPoolExecutor，线程池5种状态:
 
 1、RUNNING:  接受新任务，处理任务队列中的任务
