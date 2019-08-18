@@ -1,4 +1,4 @@
-﻿在多线程编程中，或多或少都听过或者使用过线程池，合理利用线程池能够带来三个好处。
+在多线程编程中，或多或少都听过或者使用过线程池，合理利用线程池能够带来三个好处。
 
 1、降低资源消耗。通过重复利用已创建的线程降低线程创建和销毁造成的消耗。
 
@@ -273,13 +273,17 @@ RejectedExecutionHandler，线程池的拒绝策略。所谓拒绝策略，是�
 
 ThreadPoolExecutor 执行execute 方法分下面4种
 
-1）.如果当前运行的线程小于corePoolSize,则创建新线程执行任务（任务无需入阻塞队列）。
+1、如果当前运行的线程小于corePoolSize,则创建新线程执行任务（任务无需入阻塞队列，即使此时线程池中存在空闲线程。）。
 
-2）.如果当运行的线程大于等于CorePoolSize，那么将任务加入到BlockingQueue。
+2、如果当运行的线程大于等于CorePoolSize，那么将任务加入到BlockingQueue,等待线程池中任务调度执行 。
 
-3）.如果不能加入BlockingQueue（队列已满），如果线程数小于MaxPoolSize，则创建线程执行任务。
+3、如果不能加入BlockingQueue（队列已满），如果线程数小于MaxPoolSize，则创建线程执行任务。
 
-4）.如果线程数大于等于MaxPoolSize，那么执行拒绝策略。
+4、如果线程数大于等于MaxPoolSize，那么执行拒绝策略。
+
+5、当线程池中线程数超过corePoolSize，且超过这部分的空闲时间达到keepAliveTime时，回收这些线程。
+
+6、当设置 allowCoreThreadTimeOut(true)时，线程池中corePoolSize范围内的线程空闲时间达到keepAliveTime也将回收。
 
 ![这里写图片描述](http://img.blog.ztgreat.cn/document/juc/20180120181611858.png)
 
