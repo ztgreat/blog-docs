@@ -146,6 +146,7 @@ public <T> Future<T> submit(Callable<T> task) {
     return ftask;
 }
 ```
+
 大致过程就是根据提交的任务封装成FutureTask 对象，然后再执行任务，execute 方法交由具体的子类来实现。
 
 #### ThreadPoolExecutor
