@@ -405,6 +405,10 @@ Double Check 主要目的是判断加入到队列队列中的线程是否可以�
 
 ![这里写图片描述](http://img.blog.ztgreat.cn/document/juc/20180122171351380.png)
 
+
+
+**问题：worker 为什么需要需要做成一个同步组件呢？**
+
 ##### 属性
 ```
 //worker持有的线程
