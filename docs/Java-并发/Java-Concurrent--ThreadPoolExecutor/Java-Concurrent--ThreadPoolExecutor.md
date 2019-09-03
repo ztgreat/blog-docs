@@ -418,12 +418,12 @@ Worker(Runnable firstTask) {
     // 初始化同步状态，在这种状态下，无法中断，见interruptIfStarted() 方法
     setState(-1); // inhibit interrupts until runWorker
     this.firstTask = firstTask;
-    //创建线程
+    //创建线程，把当前worker 传入 当 任务
     this.thread = getThreadFactory().newThread(this);
 }
 /** Delegates main run loop to outer runWorker  */
 public void run() {
-    //委托给runWorker
+    //委托给runWorker，当执行 thread.start()的时候，会调用到这里
     runWorker(this);
 }
 void interruptIfStarted() {
