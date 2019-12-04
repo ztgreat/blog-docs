@@ -1,5 +1,3 @@
-
-
 >本文来自阿里巴巴中间件
 >
 >原文链接 : [分布式事务 GTS 的价值和原理浅析](https://mp.weixin.qq.com/s/po8gWGrvU63hbDphzV10Iw)
@@ -28,7 +26,7 @@ GTS 给业务应用带来的价值体现在以下几个方面：
 
 
 
-![img](http://img.blog.ztgreat.cn/document/transaction/1575277132759.webp)
+![img](http://img.blog.ztgreat.cn/document/transaction/1575277132759.png)
 
 
 
@@ -61,7 +59,7 @@ GTS 给业务应用带来的价值体现在以下几个方面：
 
 
 
-![15752771327](http://img.blog.ztgreat.cn/document/transaction/15752771327.webp)
+![15752771327](http://img.blog.ztgreat.cn/document/transaction/1575277132711.png)
 
 
 
@@ -75,7 +73,7 @@ GTS 给业务应用带来的价值体现在以下几个方面：
 
 
 
-![1575277132788](http://img.blog.ztgreat.cn/document/transaction/1575277132788.webp)
+![1575277132788](http://img.blog.ztgreat.cn/document/transaction/1575277132788.png)
 
 
 
@@ -111,7 +109,7 @@ GTS 的 JDBC 数据源代理通过对业务 SQL 的解析，把业务数据在�
 
 
 
-![1575277132815](http://img.blog.ztgreat.cn/document/transaction/1575277132815.webp)
+![1575277132815](http://img.blog.ztgreat.cn/document/transaction/1575277132815.png)
 
 
 
@@ -125,7 +123,7 @@ GTS 的 JDBC 数据源代理通过对业务 SQL 的解析，把业务数据在�
 
 - 如果 TM 发出的决议是全局提交，此时分支事务此时已经完成提交，不需要同步协调处理（只需要异步清理回滚日志），完成阶段 可以非常快速地完成。
 
-![1575277132772](http://img.blog.ztgreat.cn/document/transaction/1575277132772.webp)
+![1575277132772](http://img.blog.ztgreat.cn/document/transaction/1575277132772.png)
 
 
 
@@ -133,13 +131,13 @@ GTS 的 JDBC 数据源代理通过对业务 SQL 的解析，把业务数据在�
 
 - 如果 TM 发出的决议是全局回滚，RM 收到协调器发来的回滚请求，通过 XID 和 Branch ID 找到相应的回滚日志记录，通过回滚记录生成反向的更新 SQL 并执行，以完成分支的回滚。
 
-![1575277132783](http://img.blog.ztgreat.cn/document/transaction/1575277132783.webp)
+![1575277132783](http://img.blog.ztgreat.cn/document/transaction/1575277132783.png)
 
 
 
 最后，GTS 通过事务协调器集群以及对业务应用节点的容错，实现一个拒绝单点故障的高可用服务。
 
-![1575277132787](http://img.blog.ztgreat.cn/document/transaction/1575277132787.webp)
+![1575277132787](http://img.blog.ztgreat.cn/document/transaction/1575277132787.png)
 
 
 
