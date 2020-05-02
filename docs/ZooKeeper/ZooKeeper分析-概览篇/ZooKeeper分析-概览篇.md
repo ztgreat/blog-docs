@@ -13,7 +13,7 @@ zookeeper 系列文章 会讲一些重要的功能和概念，主要包括：
  - 读写请求操作
  - 数据与存储
 
-本节主要 讲一下 zookeeper 的一些总要概念，方便大家对它有一个总体的粗略认识。
+本节主要 讲一下 zookeeper 的一些重要概念，方便大家对它有一个总体的粗略认识。
 
 ## 概念
 ZooKeeper 是一个开源的分布式协调服务，ZooKeeper 的设计目标是将那些复杂且容易出错的分布式一致性服务封装起来，构成一个高效可靠的原语集，并以一系列简单易用的接口提供给用户使用。
@@ -44,7 +44,7 @@ ZooKeeper的命名空间是由一系列数据节点组成的，下面我们对�
 
 #### 节点类型
 
-在ZooKeeper 中，每个数据节点都是由生命周期的，其生命周期的长短取决于数据节点的节点类型。在ZooKeeper中，节点类型可以分为**持久节点**，**临时节点**和**顺序节点**三大类，具体在节点创建过程中，通过组合使用，可以生成下面四种组合型节点类型:
+在ZooKeeper 中，每个数据节点都是由生命周期的，其生命周期的长短取决于数据节点的节点类型。在ZooKeeper中，节点类型可以分为**持久节点**，**临时节点**，**顺序节点**,**容器节点**,**TTL节点** 几大类
 
 ##### 持久节点
 
@@ -68,9 +68,17 @@ ZooKeeper的命名空间是由一系列数据节点组成的，下面我们对�
 
 临时顺序节点的基本特性和临时节点也是一致的，同样的是在临时节点的基础上，添加了顺序的特性。
 
+##### 容器节点
 
+Zookeeper在`3.6.0`版本新增的一种节点类型,其特点为 **当容器节点的最后一个孩子节点被删除之后，容器节点将被标注并在一段时间后删除.**
 
-最后关于 代码层面的数据结构，可以参考：`org.apache.zookeeper.server.DataTree` 相关代码：
+##### TTL 节点
+
+Zookeeper在`3.6.0`版本新增的一种节点类型
+
+创建持久节点或持久有序节点 时，可以选择为znode以毫秒为单位设置TTL。如果znode在TTL中未修改且没有子级，则它将在未来被服务器自动删除。
+
+最后关于 代码层面的数据结构可以参考：`DataTree` 类和 `EphemeralType` 枚举：
 
 ```
 public class DataTree {
@@ -104,6 +112,8 @@ public class DataNode implements Record {
     private Set<String> children = null;
 }
 ```
+
+
 
 
 
@@ -266,7 +276,9 @@ Zookeeper watch 机制 是一个轻量级的设计。因为它采用了一种**�
 
 ![watch机制](http://img.blog.ztgreat.cn/document/zookeeper/1537065381513e3180f785d.png)
 
-ZooKeeper  watcher机制 是**一次性触发**的：
+ZooKeeper的Watch机制主要包括客户端线程，客户端WatchManager和ZooKeeper服务器三部分。客户端在向ZooKeeper 服务器注册Wather的同时，会将Watcher对象存储在客户端的WatchManager中，当ZooKeeper 服务端触发Watch 事件后，会向客户端**发送通知**，客户端线程从WatchManager中取出对应的Watcher对象来执行回调逻辑。
+
+ZooKeeper  watcher机制 是**一次性触发**的(`3.6.0` 有新增，后面会说到)：
 当数据改变的时候，那么一个event事件会产生并且被发送到客户端中。但是客户端只会收到一次这样的通知，如果以后这个数据再次发生改变的时候，之前设置Watch的客户端将不会再次收到改变的通知，因为Watch机制规定了它是一个一次性的触发器。    
 因此 如果我们要一直对某个节点保持有效监视 需要 每收到变更通知后，重新注册watch，类似下面的代码：
 
@@ -283,6 +295,8 @@ public void subscribe(final SubscriberCallBack subscriberCallBack) throws Except
     client.getData().usingWatcher(curatorWatcher).forPath(ZookeeperPaths.getTopicBase());
 }
 ```
+
+``3.6.0中的新增功能`：上述watcher 有所变化，可以设置不会触发时被移除的watcher, 并且（可选）从注册该监视的znode处递归地为所有znode递归触发。
 
 
 
